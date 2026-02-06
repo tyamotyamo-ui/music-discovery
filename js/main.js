@@ -1,17 +1,24 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("discover-btn");
-    const text = document.getElementById("discovery-text");
+import { fetchAllSources } from "../api.js";
+import { generateMixTracks } from "./mix.js";
+import { renderRecommended, renderTabs, showSkeleton, showError } from "./ui.js";
 
-    const discoveries = [
-        "新しい音楽ジャンルを発見しました",
-        "今日は良いメロディが浮かびそうです",
-        "知らなかったコード進行に出会いました",
-        "新しいアイデアが生まれそうです",
-        "音の組み合わせに可能性を感じます"
-    ];
+async function loadAll() {
+  showSkeleton();
 
-    btn.addEventListener("click", () => {
-        const random = Math.floor(Math.random() * discoveries.length);
-        text.textContent = discoveries[random];
-    });
-});
+  try {
+    const all = await fetchAllSources();
+    all.Mix = generateMixTracks(all);
+
+    renderRecommended(all);
+    renderTabs(all);
+
+    document.getElementById("update-info").textContent = "更新完了";
+  } catch (e) {
+    console.error(e);
+    showError("データ取得に失敗しました");
+  }
+}
+
+document.getElementById("update-button").addEventListener("click", loadAll);
+
+// 初
