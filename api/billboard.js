@@ -6,6 +6,12 @@ export default function handler(req, res) {
         artist: "Artist Z",
         genre: "Dance",
         source: "Billboard"
+      },
+      {
+        title: "Billboard Track B",
+        artist: "Artist W",
+        genre: "HipHop",
+        source: "Billboard"
       }
     ]
   });
