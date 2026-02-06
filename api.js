@@ -1,3 +1,4 @@
+// 4つの API からデータをまとめて取得する中心関数
 export async function fetchAllSources() {
   const [sp, yt, ap, bb] = await Promise.all([
     fetch("/api/spotify").then(r => r.json()),
