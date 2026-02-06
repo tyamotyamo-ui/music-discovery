@@ -1,61 +1,54 @@
-import { fetchAnalysis, getCachedAnalysis, saveCachedAnalysis, formatAnalysisHTML } from "./analysis.js";
+// タブ描画
+export function renderTabs(all) {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
 
-export function showSkeleton() { ... }
-export function showError(msg) { ... }
+  const sources = Object.keys(all); // Spotify / YouTube / Apple / Billboard / Mix
 
-export function createTrackCard(track) {
-  const card = document.createElement("div");
-  card.className = "card";
+  sources.forEach(src => {
+    const btn = document.createElement("button");
+    btn.textContent = src;
+    btn.className = "tab-button";
 
-  // タイトル・メタ情報・バッジなど生成
+    btn.addEventListener("click", () => {
+      renderRecommended({ [src]: all[src] });
+    });
 
-  const detail = document.createElement("div");
-  detail.className = "detail-content";
-
-  const toggle = document.createElement("div");
-  toggle.className = "toggle-detail";
-  toggle.innerHTML = `<span>詳細を開く</span><span>▾</span>`;
-
-  let opened = false;
-
-  toggle.addEventListener("click", async () => {
-    opened = !opened;
-
-    if (opened) {
-      const cached = getCachedAnalysis(track);
-
-      if (cached) {
-        detail.innerHTML = cached;
-        detail.classList.add("open");
-        toggle.innerHTML = `<span>詳細を閉じる</span><span>▴</span>`;
-        return;
-      }
-
-      detail.innerHTML = `<span class="loading-dots">●●●</span>`;
-
-      try {
-        const analysis = await fetchAnalysis(track);
-        const formatted = formatAnalysisHTML(analysis);
-
-        saveCachedAnalysis(track, formatted);
-        detail.innerHTML = formatted;
-        detail.classList.add("open");
-      } catch {
-        detail.innerHTML = `<div class="error-box">分析に失敗しました。</div>`;
-      }
-    } else {
-      detail.classList.remove("open");
-    }
-
-    toggle.innerHTML = opened
-      ? `<span>詳細を閉じる</span><span>▴</span>`
-      : `<span>詳細を開く</span><span>▾</span>`;
+    tabs.appendChild(btn);
   });
-
-  card.appendChild(toggle);
-  card.appendChild(detail);
-  return card;
 }
 
-export function renderRecommended(all) { ... }
-export function renderTabs(all) { ... }
+// カード描画
+export function renderRecommended(all) {
+  const container = document.getElementById("recommended-container");
+  container.innerHTML = "";
+
+  const source = Object.keys(all)[0];
+  const tracks = all[source];
+
+  tracks.forEach(track => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>${track.title}</h3>
+      <p>${track.artist}</p>
+      <p>${track.genre}</p>
+      <span class="source">${track.source}</span>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// ローディング表示
+export function showSkeleton() {
+  const container = document.getElementById("recommended-container");
+  container.innerHTML = "<p>読み込み中...</p>";
+}
+
+// エラー表示
+export function showError(msg) {
+  const container = document.getElementById("recommended-container");
+  container.innerHTML = `<p style="color:red">${msg}</p>`;
+}
